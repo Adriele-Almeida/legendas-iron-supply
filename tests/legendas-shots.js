@@ -1,4 +1,4 @@
-const p=require('/workspace/pptr/node_modules/puppeteer-core');const D='/workspace/app-legendas-iron';const U='http://localhost:41635/';
+const p=require('/workspace/pptr/node_modules/puppeteer-core');const D='/workspace/app-legendas-iron';const U=process.argv[2]||'http://localhost:41635/';
 (async()=>{
  const b=await p.launch({executablePath:'/usr/bin/google-chrome',headless:'new',args:['--no-sandbox']});
  const pg=await b.newPage();

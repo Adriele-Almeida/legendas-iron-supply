@@ -32,22 +32,28 @@ const rank = name => {
   if (!m) return 999;
   return (m[1].toLowerCase() === 'post' ? 0 : 100) + (m[2] ? Number(m[2]) : 1);
 };
-const imagesFor = p => files
-  .filter(([, name]) => norm(name.replace(/ - (Post|Story).*$/i, '')) === norm(p))
-  .sort((a, b) => rank(a[1]) - rank(b[1]))
-  .map(([id, name]) => ({
+// Uma imagem por produto: prefere "Post" sem número, depois o menor número; se não houver Post, usa "Story".
+const imageFor = p => {
+  const [best] = files
+    .filter(([, name]) => norm(name.replace(/ - (Post|Story).*$/i, '')) === norm(p))
+    .sort((a, b) => rank(a[1]) - rank(b[1]));
+  if (!best) return null;
+  const [id, name] = best;
+  return {
     id, name,
+    tipo: /story/i.test(name) ? 'Story' : 'Post',
     view: `https://drive.google.com/file/d/${id}/view`,
     thumb: `https://drive.google.com/thumbnail?id=${id}&sz=w800`,
-  }));
+  };
+};
 
 const problems = [];
 const data = PRODUCTS.map(name => {
   const caption = captions.get(norm(name)) ?? null;
-  const images = imagesFor(name);
+  const image = imageFor(name);
   if (!caption) problems.push(`SEM LEGENDA: ${name}`);
-  if (!images.length) problems.push(`SEM IMAGEM: ${name}`);
-  return { name, caption, images };
+  if (!image) problems.push(`SEM IMAGEM: ${name}`);
+  return { name, caption, tipo: image ? image.tipo : null, image };
 });
 const known = new Set(PRODUCTS.map(norm));
 for (const k of captions.keys()) if (!known.has(k)) problems.push(`LEGENDA NAO USADA: ${k}`);
@@ -55,5 +61,5 @@ for (const k of captions.keys()) if (!known.has(k)) problems.push(`LEGENDA NAO U
 writeFileSync(join(here, 'data.js'),
   `// Gerado por build-data.mjs a partir de ${txtPath.split('/').pop()} em ${new Date().toISOString()}\n` +
   `window.PRODUTOS = ${JSON.stringify(data, null, 2)};\n`);
-console.log(`data.js: ${data.length} produtos, ${blocks.length} legendas no arquivo, ${data.filter(d => d.images.length).length} com imagem.`);
+console.log(`data.js: ${data.length} produtos, ${blocks.length} legendas no arquivo, ${data.filter(d => d.image).length} com imagem.`);
 problems.forEach(p => console.warn('AVISO', p));

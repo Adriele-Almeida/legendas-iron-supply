@@ -11,4 +11,8 @@ Regenerar com outra versão das legendas:
 
     node build-data.mjs /workspace/legendas-iron-supply-v4.txt
 
+Recursos: botões Copiar legenda / Abrir no Drive, selo Story/Post, stories primeiro, filtros "Só post"/"Só story", busca, modos lista/grade com zoom (+/−) salvos no navegador.
+
+Testes (headless): `node tests/legendas-test.js <url> [prefixo-screenshots]`
+
 Rodar localmente: `python3 -m http.server 8080` e abrir http://localhost:8080
